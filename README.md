@@ -1,0 +1,1 @@
+This is a series of tutorials from YouTube following the [Android Gaming Tutorial playlist](https://www.youtube.com/playlist?list=PL4rzdwizLaxYqSDifOi7mUtyzdM6R_2sT). I intend to complete all 34 videos by *January 31, 2025*.
