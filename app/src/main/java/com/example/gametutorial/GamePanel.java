@@ -11,6 +11,8 @@ import android.view.SurfaceView;
 
 import androidx.annotation.NonNull;
 
+import com.example.gametutorial.entities.GameCharacters;
+
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -19,12 +21,11 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
     private final Paint redPaint = new Paint();
     private SurfaceHolder holder;
     // declare variable for input
-    float xInput, yInput;
-    // array list for holding the red squares we will draw
-    private ArrayList<RandomSquare> squares = new ArrayList<>();
+    private float xInput, yInput;
     // get a random value
     private Random rand = new Random();
     private GameLoop gameLoop;
+    private ArrayList<PointF> flames = new ArrayList<>();
 
 
     public GamePanel(Context context) {
@@ -33,48 +34,53 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
         holder.addCallback(this);
         redPaint.setColor(Color.RED);
         gameLoop = new GameLoop(this);
+
+        for (int i = 0; i < 10; i++) {
+            flames.add(new PointF(rand.nextInt(500), rand.nextInt(1000)));
+        }
+
     }
 
     public void render() {
-
         // Get the canvas
         Canvas c = holder.lockCanvas();
         c.drawColor(Color.BLACK);
 
-        // Draw to the canvas
-        for(RandomSquare square : squares){
-            square.draw(c);
+        c.drawBitmap(GameCharacters.PLAYER.getSpriteSheet(), 500, 500, null);
+
+        c.drawBitmap(GameCharacters.PLAYER.getSprite(6, 3), xInput, yInput, null);
+        c.drawBitmap(GameCharacters.FLAMEPLAYER.getSprite(4, 3), 500, 500, null);
+
+        for (PointF pos : flames){
+            c.drawBitmap(GameCharacters.FLAMEPLAYER.getSprite(4, 3), pos.x, pos.y, null);
         }
+
         // send canvas to be rendered
         holder.unlockCanvasAndPost(c);
     }
 
-    public void update(){
+    public void update(double delta) {
         // Draw to the canvas
-        for(RandomSquare square : squares){
-            square.move();
+        for (PointF pos : flames) {
+            pos.y += 100 * delta;
+            pos.x += 100 * delta;
+
+            if (pos.y >= 400) {
+                pos.y *= -1;
+            }
+
+            if (pos.x >= 900) {
+                pos.x *= -1;
+            }
         }
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        // get the input from the screen and store it to the x and y variables
-        xInput = event.getX();
-        yInput = event.getY();
-
-        if(event.getAction() == MotionEvent.ACTION_DOWN){
-            System.out.println("Pressing down event");
-
-            PointF pos = new PointF(xInput, yInput);
-            int color = Color.rgb(rand.nextInt(256), rand.nextInt(256), rand.nextInt(256));
-            int size = rand.nextInt(100) + 25;
-
-            squares.add(new RandomSquare(pos, color, size));
-            // call render method
-//            render();
-//            update();
+        if (event.getAction() == MotionEvent.ACTION_DOWN) {
+            xInput = event.getX();
+            yInput = event.getY();
         }
-
         return true;
     }
 
@@ -91,38 +97,6 @@ public class GamePanel extends SurfaceView implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceDestroyed(@NonNull SurfaceHolder surfaceHolder) {
-
-    }
-
-    private class RandomSquare{
-        private PointF pos;
-        private int size;
-        private Paint paint;
-        private int xDir = 1;
-        private int yDir = 1;
-
-        public RandomSquare(PointF pos, int color, int size){
-            paint = new Paint();
-            paint.setColor(color);
-            this.pos = pos;
-            this.size = size;
-        }
-
-        public void move(){
-            pos.x += xDir;
-            if(pos.x >= 1080 || pos.x <= 0){
-                xDir *= -5;
-            }
-            pos.y += yDir;
-            if(pos.y >= 1920 || pos.y <= 0){
-                yDir *= -5;
-            }
-        }
-
-        public void draw(Canvas c){
-            c.drawRect(pos.x, pos.y, pos.x + size, pos.y + size, paint);
-        }
-
 
     }
 }
